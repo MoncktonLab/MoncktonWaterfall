@@ -1,5 +1,6 @@
 # MoncktonWaterfall
 
+Adapted from https://github.com/PacificBiosciences/apps-scripts/blob/master/RepeatAnalysisTools/waterfall.py
 
 # Usage Instructions
 
