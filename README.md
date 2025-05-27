@@ -1,5 +1,8 @@
 # MoncktonWaterfall
 
+
+# Usage Instructions
+
 Usage: MoncktonWaterfall.py [-h] -i,--inFastx INFASTX -o,--out OUT [-m,--motifs MOTIFS] [-L,--locus LOCUS]
                              [-q,--plotQV] [-Q,--quality MIN_QUALITY_THRESHOLD] [-t,--quality-type QUALITY_TYPE]
                              [-S,--sort-type SORT_TYPE] [-R,--reverse-complement FASTQ_RC]
