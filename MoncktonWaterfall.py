@@ -165,11 +165,11 @@ def main(parser):
         patches = [ mpatches.Patch(color=color, label=motif ) for motif,color in legend_list]
 	n_rows = raster.shape[0]
         plotWaterfall(raster, XLABEL, args.ylabel, labels=patches, ax=ax1)
-        ax1.set_title(f'Short Allele Reads, n= {n_rows}')
+	ax1.set_title(f'Short Allele Reads, n= {n_rows}')
         raster = motifRaster(long_reads, motifs_all, colors)
 	n_rows = raster.shape[0]
         plotWaterfall(raster, XLABEL, args.ylabel, labels=patches, ax=ax2)
-        ax2.set_title(f'Long Allele Reads, n= {n_rows}')
+	ax2.set_title(f'Long Allele Reads, n= {n_rows}')
         out = f"{args.out}.{args.format}"
         plt.tight_layout()
         fig.savefig(out, dpi=args.dpi, format=args.format)
@@ -201,7 +201,7 @@ def main(parser):
                 legend_list.append((motif,color))
         patches = [ mpatches.Patch(color=color, label=motif ) for motif,color in legend_list]
         f,ax    = plotWaterfall(raster,XLABEL,args.ylabel,labels=patches)
-        out = args.out if args.out.endswith(args.format) else '%s.%s' % (args.out,args.format) 
+        out = args.out if args.out.endswith(args.format) else '%s.%s' % (args.out,args.format)
 	ax.set_title(f'{out}, n= {n_rows}')
         plt.tight_layout()
         f.savefig(out,dpi=args.dpi,format=args.format)
