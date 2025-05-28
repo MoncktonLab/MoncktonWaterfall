@@ -190,6 +190,7 @@ def main(parser):
     else:
         colors  = OrderedDict([(m,COLORMAP_final[i]) for i,m in enumerate(motifs_all)])
         raster  = motifRaster(filteredRecs,motifs_all,colors)
+	n_rows = raster.shape[0]
         # replace 'U' and 'D' keys to 'flank' in legend
         legend_list = []
         for motif,color in list(colors.items()):
