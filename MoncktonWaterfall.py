@@ -70,6 +70,9 @@ def main(parser):
         elif args.locus == 'DMPK1':
             motifs_locus = ['CTG','CCG','CTC']
             colours_locus = ['#933b33', '#9dbb61','#4bacc6']
+	    elif args.locus == 'ERDA1':
+            motifs_locus = ['CAG','CCG','CAC','CAT']
+            colours_locus = ['#933b33', '#4bacc6','#9dbb61','#ffc000']
         COLORMAP_locus = [mcolors.to_rgb(hex_color) for hex_color in colours_locus]
         if args.motifs:
             motifs_all = list(OrderedDict.fromkeys(motifs_locus+motifs))
