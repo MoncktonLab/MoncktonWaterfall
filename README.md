@@ -12,7 +12,11 @@ Usage: MoncktonWaterfall.py [-h] -i,--inFastx INFASTX -o,--out OUT [-m,--motifs 
                              [-f,--format FORMAT] [-d,--dpi DPI]  
 
 Quick waterfall plot from sequencing reads in fasta/fastq format. Some options incompatible with fasta format.  
-  
+
+WARNINGS:  
+Some options incompatible with fasta format.  
+Some options are not mutually compatible.
+
 optional arguments:  
   -h, --help            show this help message and exit  
   -i,--inFastx INFASTX  Input Fastx file. (required)  
@@ -27,45 +31,46 @@ optional arguments:
                         Set average read quality filter (Q score), see -t for other quality scoring options. Default 0  
   -t,--quality-type QUALITY_TYPE  
                         Set the read quality scoring method. Options: Average, First200. Default Average  
-  -S,--sort-type SORT_TYPE
-                        Set how reads are sorted. Options: repeat_length, repeat_count, flank_position, flank_presence, length. Can combine options by comma-separating them, the order sets the hierarchy of which option is considered first (e.g. 'flank_presence,repeat_length').
-                        Default Read length
-  -R,--reverse-complement FASTQ_RC
-                        Set whether reads should be reverse complemented based on sequence. Options: repeats, flanks,
-                        both. Default False
-  -a,--allele_length ALLELE_LENGTH
-                        Set whether reads are split between two graphs based on allele. Set with the number of repeats
-                        in the short allele. Not compatible with -q. Default None
-  -C,--colours COLOURS  Specify colours for motifs using comma-separated HEX codes. Should match length and order of
-                        motifs. Default colours from the 'tab10' colour palette.
-  -M,--max-read-length MAX_LENGTH
-                        Do not plot reads above this length. Default None
-  -F,--flanks FLANKS    Comma separated upstream and downstream flanking motifs. Can be used to colour-code flanks,
-                        remove reads without either or both flanks, or sort by downstream flank position. Default None
-  -y,--ylabel YLABEL    Y-axis label for plot. Default Reads
-  -f,--format FORMAT    Image format. Default png
-  -d,--dpi DPI          Image resolution. Default 400
+  -S,--sort-type SORT_TYPE  
+                        Set how reads are sorted. Options: repeat_length, repeat_count, flank_position, flank_presence, length.  
+						Can combine options by comma-separating them, the order sets the hierarchy of which option is considered  
+						first (e.g. 'flank_presence,repeat_length'). Default Read length  
+  -R,--reverse-complement FASTQ_RC  
+                        Set whether reads should be reverse complemented based on sequence. Options: repeats, flanks,  
+                        both. Default False  
+  -a,--allele_length ALLELE_LENGTH  
+                        Set whether reads are split between two graphs based on allele. Set with the number of repeats  
+                        in the short allele. Not compatible with -q. Default None  
+  -C,--colours COLOURS  Specify colours for motifs using comma-separated HEX codes. Should match length and order of  
+                        motifs. Default colours from the 'tab10' colour palette.  
+  -M,--max-read-length MAX_LENGTH  
+                        Do not plot reads above this length. Default None  
+  -F,--flanks FLANKS    Comma separated upstream and downstream flanking motifs. Can be used to colour-code flanks,  
+                        remove reads without either or both flanks, or sort by downstream flank position. Default None  
+  -y,--ylabel YLABEL    Y-axis label for plot. Default Reads  
+  -f,--format FORMAT    Image format. Default png  
+  -d,--dpi DPI          Image resolution. Default 400  
+  
+Minimum usage:  
+	python MoncktonWaterfall.py -i reads.fastq -m CAG,CCG,CAA,CCA,CCT -o reads_output.png  
+	  
+Specifying locus and plotting a read quality plot:  
+	python MoncktonWaterfall.py -i reads.fastq -L HTT -q -o reads_output.png  
+	  
+Specifying locus with flank as additional motifs:  
+	python MoncktonWaterfall.py -i reads.fastq -L HTT -m TTCCGATC -o reads_output.png  
+	  
+Reverse complement reverse reads and exclude reads longer than 1000 bases:  
+	python MoncktonWaterfall.py -i reads.fastq -L HTT -R -M 1000 -o reads_output.png  
 
-Minimum usage:
-	python MoncktonWaterfall.py -i reads.fastq -m CAG,CCG,CAA,CCA,CCT -o reads_output.png
-	
-Specifying locus and plotting a read quality plot:
-	python MoncktonWaterfall.py -i reads.fastq -L HTT -q -o reads_output.png
-	
-Specifying locus with flank as additional motifs:
-	python MoncktonWaterfall.py -i reads.fastq -L HTT -m TTCCGATC -o reads_output.png
-	
-Reverse complement reverse reads and exclude reads longer than 1000 bases:
-	python MoncktonWaterfall.py -i reads.fastq -L HTT -R -M 1000 -o reads_output.png
+Filtering on read quality score (average > 30) and sorting by continuous CAG length:  
+	python MoncktonWaterfall.py -i reads.fastq -L HTT -Q 30 -t Average -S repeat_length -o reads_output.png  
 
-Filtering on read quality score (average > 30) and sorting by continuous CAG length:
-	python MoncktonWaterfall.py -i reads.fastq -L HTT -Q 30 -t Average -S repeat_length -o reads_output.png
+Specifying motifs with custom colours:  
+	python MoncktonWaterfall.py -i reads.fastq -m CAG,CCG,CAA,CCA,CCT -C #933b33,#9dbb61,#4bacc6,#ffc000,#ab9bc3 -o reads_output.png  
 
-Specifying motifs with custom colours:
-	python MoncktonWaterfall.py -i reads.fastq -m CAG,CCG,CAA,CCA,CCT -C #933b33,#9dbb61,#4bacc6,#ffc000,#ab9bc3 -o reads_output.png
-
-Specifying locus and flanking sequences, and sorting by downstream flank position (works well as an alternative to sorting by repeat length):
-	python MoncktonWaterfall.py -i reads.fastq -L HTT -F CGACCCT,AGCTTC -S flank_position -o reads_output.png
+Specifying locus and flanking sequences, and sorting by downstream flank position (works well as an alternative to sorting by repeat length):  
+	python MoncktonWaterfall.py -i reads.fastq -L HTT -F CGACCCT,AGCTTC -S flank_position -o reads_output.png  
 	
 
 More details on options: 
@@ -87,9 +92,6 @@ More details on options:
 
 
 
-Additional changes from v4:
-	- changed ordering in -S flank_presence
-	- changed -R repeats to only count most frequent motif (the first one specified)
 	- some error catching, defining choices for arguments etc.
 
 Additional changes from v5:
