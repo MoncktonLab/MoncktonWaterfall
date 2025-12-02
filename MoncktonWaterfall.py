@@ -66,13 +66,13 @@ def main(parser):
     if args.locus:
         if args.locus == 'HTT':
             motifs_locus = ['CAG','CCG','CAA','CCA','CCT']
-            colours_locus = ['#933b33','#4bacc6','#9dbb61','#ffc000','#ab9bc3']
+            colours_locus = ['#DB6968','#4D97CD','#46C1BE','#E8C559','#B279B4']
         elif args.locus == 'DMPK1':
             motifs_locus = ['CTG','CCG','CTC']
-            colours_locus = ['#933b33', '#9dbb61','#4bacc6']
+            colours_locus = ['#DB6968', '#4D97CD','#46C1BE']
         elif args.locus == 'ERDA1':
             motifs_locus = ['CAG','CCG','CAC','CAT']
-            colours_locus = ['#933b33', '#4bacc6','#9dbb61','#ffc000']
+            colours_locus = ['#DB6968', '#4D97CD','#46C1BE','#E8C559']
         COLORMAP_locus = [mcolors.to_rgb(hex_color) for hex_color in colours_locus]
         if args.motifs:
             motifs_all = list(OrderedDict.fromkeys(motifs_locus+motifs))
