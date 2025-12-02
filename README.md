@@ -1,32 +1,32 @@
-# MoncktonWaterfall
+# MoncktonWaterfall  
 
-Adapted from https://github.com/PacificBiosciences/apps-scripts/blob/master/RepeatAnalysisTools/waterfall.py
+Adapted from https://github.com/PacificBiosciences/apps-scripts/blob/master/RepeatAnalysisTools/waterfall.py  
 
-# Usage Instructions
+# Usage Instructions  
 
-Usage: MoncktonWaterfall.py [-h] -i,--inFastx INFASTX -o,--out OUT [-m,--motifs MOTIFS] [-L,--locus LOCUS]
-                             [-q,--plotQV] [-Q,--quality MIN_QUALITY_THRESHOLD] [-t,--quality-type QUALITY_TYPE]
-                             [-S,--sort-type SORT_TYPE] [-R,--reverse-complement FASTQ_RC]
-                             [-a,--allele_length ALLELE_LENGTH] [-C,--colours COLOURS]
-                             [-M,--max-read-length MAX_LENGTH] [-F,--flanks FLANKS] [-y,--ylabel YLABEL]
-                             [-f,--format FORMAT] [-d,--dpi DPI]
+Usage: MoncktonWaterfall.py [-h] -i,--inFastx INFASTX -o,--out OUT [-m,--motifs MOTIFS] [-L,--locus LOCUS]  
+                             [-q,--plotQV] [-Q,--quality MIN_QUALITY_THRESHOLD] [-t,--quality-type QUALITY_TYPE]  
+                             [-S,--sort-type SORT_TYPE] [-R,--reverse-complement FASTQ_RC]  
+                             [-a,--allele_length ALLELE_LENGTH] [-C,--colours COLOURS]  
+                             [-M,--max-read-length MAX_LENGTH] [-F,--flanks FLANKS] [-y,--ylabel YLABEL]  
+                             [-f,--format FORMAT] [-d,--dpi DPI]  
 
-Quick waterfall plot from sequencing reads in fasta/fastq format. Some options incompatible with fasta format.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -i,--inFastx INFASTX  Input Fastx file. (required)
-  -o,--out OUT          Output file. (required)
-  -m,--motifs MOTIFS    Search motifs, comma separated, most frequent first, e.g. 'CGG,AGG'. Either motifs (-m) or
-                        locus (-L) must be specified.
-  -L,--locus LOCUS      By specifying the locus, the motifs and colours are defined. Additional motifs to be coloured
-                        can be specified using the -m flag. Either motifs (-m) or locus (-L) must be specified.
-                        (Options: HTT, DMPK1)
-  -q,--plotQV           Plot additional QV waterfall (visualising base quality of reads). Default False
-  -Q,--quality MIN_QUALITY_THRESHOLD
-                        Set average read quality filter (Q score), see -t for other quality scoring options. Default 0
-  -t,--quality-type QUALITY_TYPE
-                        Set the read quality scoring method. Options: Average, First200. Default Average
+Quick waterfall plot from sequencing reads in fasta/fastq format. Some options incompatible with fasta format.  
+  
+optional arguments:  
+  -h, --help            show this help message and exit  
+  -i,--inFastx INFASTX  Input Fastx file. (required)  
+  -o,--out OUT          Output file. (required)  
+  -m,--motifs MOTIFS    Search motifs, comma separated, most frequent first, e.g. 'CGG,AGG'. Either motifs (-m) or  
+                        locus (-L) must be specified.  
+  -L,--locus LOCUS      By specifying the locus, the motifs and colours are defined. Additional motifs to be coloured  
+                        can be specified using the -m flag. Either motifs (-m) or locus (-L) must be specified.  
+                        (Options: HTT, DMPK1, ERDA1, TCF4)  
+  -q,--plotQV           Plot additional QV waterfall (visualising base quality of reads). Default False  
+  -Q,--quality MIN_QUALITY_THRESHOLD  
+                        Set average read quality filter (Q score), see -t for other quality scoring options. Default 0  
+  -t,--quality-type QUALITY_TYPE  
+                        Set the read quality scoring method. Options: Average, First200. Default Average  
   -S,--sort-type SORT_TYPE
                         Set how reads are sorted. Options: repeat_length, repeat_count, flank_position, flank_presence, length. Can combine options by comma-separating them, the order sets the hierarchy of which option is considered first (e.g. 'flank_presence,repeat_length').
                         Default Read length
