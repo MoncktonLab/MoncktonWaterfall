@@ -25,7 +25,7 @@ optional arguments:
                         locus (-L) must be specified.  
   -L,--locus LOCUS      By specifying the locus, the motifs and colours are defined. Additional motifs to be coloured  
                         can be specified using the -m flag. Either motifs (-m) or locus (-L) must be specified.  
-                        (Options: HTT, DMPK1, ERDA1, TCF4)  
+                        (Options: HTT, DMPK1, ERDA1)  
   -q,--plotQV           Plot additional QV waterfall (visualising base quality of reads). Default False  
   -Q,--quality MIN_QUALITY_THRESHOLD  
                         Set average read quality filter (Q score), see -t for other quality scoring options. Default 0  
