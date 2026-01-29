@@ -92,7 +92,8 @@ More details on options:
 
 
 
-	- some error catching, defining choices for arguments etc.
+
 
 Additional changes from v5:
 	- when using -F and -R, the need to reverse complement will be determined based on the sequence between the flanks. No longer need to specify an option after -R 
+	- some error catching, defining choices for arguments etc.
