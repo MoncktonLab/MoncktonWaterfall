@@ -36,7 +36,8 @@ def main(parser):
     #motifs = args.motifs.split(',') # change from v4 (to merge with v5)
     fastq_RC = args.fastq_RC 
     max_length = args.max_length
-    
+    min_length = args.min_length
+ 
     if args.allele_length != None:
       if '+' in args.allele_length:
           allele_length = int(args.allele_length.split('+')[0])
@@ -295,7 +296,7 @@ def getFlankPresence(rec):
                               
 def countCountinuousCAG(rec, motif, locus):
     count = 0
-    length = 3
+    length = len(motif)
     i = 0
     while i < len(rec) - length + 1:
         # Case 1: Continuous "CAG" motifs
@@ -452,7 +453,7 @@ if __name__ == '__main__':
                     help='Input Fastx file. (required)')
     parser.add_argument('-o,--out', dest='out', type=str, default=None, required=True,
                     help='Output file. (required)')
-    parser.add_argument('-m,--motifs', dest='motifs', type=str, default=None,
+    parser.add_argument('-M,--motifs', dest='motifs', type=str, default=None,
                     help='Search motifs, comma separated, most frequent first, e.g. \'CGG,AGG\'. Either motifs (-m) or locus (-L) must be specified.')
     parser.add_argument('-L,--locus', dest='locus', type=str, default=None,
                     help='By specifying the locus, the motifs and colours are defined. Additional motifs to be coloured can be specified using the -m flag. Either motifs (-m) or locus (-L) must be specified. (Options: HTT, DMPK1)')    
