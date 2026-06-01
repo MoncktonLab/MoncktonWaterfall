@@ -1,4 +1,4 @@
-## Equivalent to local MoncktonWaterfall_v6.py
+## Mostly equivalent to local MoncktonWaterfall_v6.py
 
 import matplotlib
 matplotlib.use('agg')
@@ -470,8 +470,10 @@ if __name__ == '__main__':
                     help='Set whether reads are split between two graphs based on allele. Set with the number of repeats in the short allele. Not compatible with -q. Default None')
     parser.add_argument('-C,--colours', dest='colours', type=str, default=None,
                     help='Specify colours for motifs using comma-separated HEX codes. Should match length and order of motifs. Default colours from the \'tab10\' colour palette.')
-    parser.add_argument('-max,--max-read-length', dest='max_length', type=int, default=None, help='Do not plot reads above this length. Default None')
-	parser.add_argument('-min,--min-read-length', dest='min_length', type=int, default=None, help='Do not plot reads above this length. Default None')
+    parser.add_argument('-max,--max-read-length', dest='max_length', type=int, default=None, 
+                        help='Do not plot reads above this length. Default None')
+    parser.add_argument('-min,--min-read-length', dest='min_length', type=int, default=None, 
+                        help='Do not plot reads above this length. Default None')
     parser.add_argument('-F,--flanks', dest='flanks', type=str, default=None,
                     help='Comma separated upstream and downstream flanking motifs. Can be used to colour-code flanks') ##Don't think functionality beyond here is implemented ##, remove reads without either or both flanks, or sort by downstream flank position. Default None')
     #parser.add_argument('-f,--flank-filtering', dest='flank-filtering', type=str, default=None,
