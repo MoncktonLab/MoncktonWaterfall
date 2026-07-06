@@ -4,11 +4,11 @@ Adapted from https://github.com/PacificBiosciences/apps-scripts/blob/master/Repe
 
 # Usage Instructions  
 
-Usage: MoncktonWaterfall.py [-h] -i,--inFastx INFASTX -o,--out OUT [-m,--motifs MOTIFS] [-L,--locus LOCUS]  
+Usage: MoncktonWaterfall.py [-h] -i,--inFastx INFASTX -o,--out OUT [-M,--motifs MOTIFS] [-L,--locus LOCUS]  
                              [-q,--plotQV] [-Q,--quality MIN_QUALITY_THRESHOLD] [-t,--quality-type QUALITY_TYPE]  
                              [-S,--sort-type SORT_TYPE] [-R,--reverse-complement FASTQ_RC]  
                              [-a,--allele_length ALLELE_LENGTH] [-C,--colours COLOURS]  
-                             [-M,--max-read-length MAX_LENGTH] [-F,--flanks FLANKS] [-y,--ylabel YLABEL]  
+                             [-max,--max-read-length MAX_LENGTH] [-min,--min-read-length MIN_LENGTH] [-F,--flanks FLANKS] [-y,--ylabel YLABEL]  
                              [-f,--format FORMAT] [-d,--dpi DPI]  
 
 Quick waterfall plot from sequencing reads in fasta/fastq format. Some options incompatible with fasta format.  
@@ -24,7 +24,7 @@ optional arguments:
   -M,--motifs MOTIFS    Search motifs, comma separated, most frequent first, e.g. 'CGG,AGG'. Either motifs (-m) or  
                         locus (-L) must be specified.  
   -L,--locus LOCUS      By specifying the locus, the motifs and colours are defined. Additional motifs to be coloured  
-                        can be specified using the -m flag. Either motifs (-m) or locus (-L) must be specified.  
+                        can be specified using the -m flag. Either motifs (-M) or locus (-L) must be specified.  
                         (Options: HTT, DMPK1, ERDA1)  
   -q,--plotQV           Plot additional QV waterfall (visualising base quality of reads). Default False  
   -Q,--quality MIN_QUALITY_THRESHOLD  
