@@ -1,5 +1,3 @@
-## Mostly equivalent to local MoncktonWaterfall_v6.py
-
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -31,10 +29,16 @@ def main(parser):
     min_quality_threshold = args.min_quality_threshold
     quality_type = args.quality_type
     sort_type = args.sort_type
+    # Keep the legacy return value defined even when --split-direction is used.
+    # In split mode the individual forward/reverse rasters are local to the
+    # plotting branch, so there is no single `raster` object to return.
+    raster = None
     
     infastx = args.inFastx
     #motifs = args.motifs.split(',') # change from v4 (to merge with v5)
-    fastq_RC = args.fastq_RC 
+    fastq_RC = args.fastq_RC
+    if args.split_direction and not fastq_RC:
+        raise Waterfall_Exception('--split-direction requires -R/--reverse-complement so that read orientation can be identified.')
     max_length = args.max_length
     min_length = args.min_length
  
@@ -195,8 +199,7 @@ def main(parser):
             fig.savefig(f'{name}.QV.{ext}', dpi=args.dpi, format=args.format)  
     else:
         colors  = OrderedDict([(m,COLORMAP_final[i]) for i,m in enumerate(motifs_all)])
-        raster  = motifRaster(filteredRecs,motifs_all,colors)
-        n_rows = raster.shape[0]
+
         # replace 'U' and 'D' keys to 'flank' in legend
         legend_list = []
         for motif,color in list(colors.items()):
@@ -206,18 +209,88 @@ def main(parser):
                 motif = 'flank'
                 legend_list.append((motif,color))
         patches = [ mpatches.Patch(color=color, label=motif ) for motif,color in legend_list]
-        f,ax    = plotWaterfall(raster,XLABEL,args.ylabel,labels=patches)
+
         out = args.out if args.out.endswith(args.format) else '%s.%s' % (args.out,args.format)
-        ax.set_title(f'{out}, n= {n_rows}')
-        plt.tight_layout()
-        f.savefig(out,dpi=args.dpi,format=args.format)
-        if args.plotQV:
-            # Generate the QV raster and plot it, now with the filtered records
-            qvraster = qvRaster(filteredRecs, 'Base QV')
-            norm     = TwoSlopeNorm(CENTERQV, vmin=MINQV, vmax=MAXQV)
-            f, ax    = plotWaterfall(qvraster, XLABEL, args.ylabel, norm=norm, cmap=QVCOLOR, colorbar='QV')
-            name, ext = out.rsplit('.', 1)
-            f.savefig(f'{name}.QV.{ext}', format=args.format) 
+
+        if args.split_direction:
+            # The orientation has to have been identified before plotting.
+            # With -R, reverseComplementFastq records the original orientation
+            # in the FASTQ header, even though reverse reads may have been
+            # reverse-complemented for plotting.
+            forward_reads = [rec for rec in filteredRecs if getReadOrientation(rec) == "forward"]
+            reverse_reads = [rec for rec in filteredRecs if getReadOrientation(rec) == "reverse"]
+
+            f, ax = plotSplitWaterfall(
+                forward_reads,
+                reverse_reads,
+                XLABEL,
+                args.ylabel,
+                motifs_all,
+                colors,
+                labels=patches
+            )
+            ax.set_title(f'{out}, forward n={len(forward_reads)}, reverse n={len(reverse_reads)}')
+            plt.tight_layout()
+            f.savefig(out, dpi=args.dpi, format=args.format)
+
+            if args.plotQV:
+                # Plot QV with the same orientation and row ordering.
+                forward_sorted = sorted(forward_reads, key=lambda rec: len(rec.sequence))
+                reverse_sorted = sorted(reverse_reads, key=lambda rec: len(rec.sequence), reverse=True)
+                all_reads = forward_sorted + reverse_sorted
+                width = max(len(rec.sequence) for rec in all_reads) if all_reads else 1
+
+                def padded_qv_raster(recs):
+                    if not recs:
+                        return np.ma.masked_all((0, width))
+                    raster = qvRaster(recs, 'Base QV')
+                    if raster.shape[1] < width:
+                        pad = np.ma.masked_all((raster.shape[0], width - raster.shape[1]))
+                        raster = np.ma.concatenate((raster, pad), axis=1)
+                    elif raster.shape[1] > width:
+                        raster = raster[:, :width]
+                    return raster
+
+                qv_forward = padded_qv_raster(forward_sorted)
+                qv_reverse = padded_qv_raster(reverse_sorted)
+                qv_reverse_for_plot = qv_reverse[::-1]
+
+                fig, qvax = plt.subplots()
+                if len(forward_sorted):
+                    norm = TwoSlopeNorm(CENTERQV, vmin=MINQV, vmax=MAXQV)
+                    qvax.imshow(qv_forward, origin='lower', aspect='auto',
+                                interpolation='nearest',
+                                extent=(0, width, 0, len(forward_sorted)),
+                                norm=norm, cmap=QVCOLOR)
+                if len(reverse_sorted):
+                    norm = TwoSlopeNorm(CENTERQV, vmin=MINQV, vmax=MAXQV)
+                    qvax.imshow(qv_reverse_for_plot, origin='lower', aspect='auto',
+                                interpolation='nearest',
+                                extent=(0, width, -len(reverse_sorted), 0),
+                                norm=norm, cmap=QVCOLOR)
+                qvax.axhline(0, color='black', linewidth=0.8)
+                qvax.set_xlabel(XLABEL)
+                qvax.set_ylabel(args.ylabel)
+                qvax.set_title(f'{out}, forward n={len(forward_sorted)}, reverse n={len(reverse_sorted)} - Quality')
+                fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=QVCOLOR), ax=qvax, shrink=0.6, label='QV')
+                plt.tight_layout()
+                name, ext = out.rsplit('.', 1)
+                fig.savefig(f'{name}.QV.{ext}', dpi=args.dpi, format=args.format)
+        else:
+            raster  = motifRaster(filteredRecs,motifs_all,colors)
+            n_rows = raster.shape[0]
+            f,ax    = plotWaterfall(raster,XLABEL,args.ylabel,labels=patches)
+            ax.set_title(f'{out}, n= {n_rows}')
+            plt.tight_layout()
+            f.savefig(out,dpi=args.dpi,format=args.format)
+            if args.plotQV:
+                # Generate the QV raster and plot it, now with the filtered records
+                qvraster = qvRaster(filteredRecs, 'Base QV')
+                norm     = TwoSlopeNorm(CENTERQV, vmin=MINQV, vmax=MAXQV)
+                f, ax    = plotWaterfall(qvraster, XLABEL, args.ylabel, norm=norm, cmap=QVCOLOR, colorbar='QV')
+                name, ext = out.rsplit('.', 1)
+                f.savefig(f'{name}.QV.{ext}', format=args.format) 
+                
     print("Done")
     return raster
 
@@ -362,11 +435,36 @@ def reverseComplementFastq(input_file, output_file, motifs):
             if (i + 1) % 4 == 0:
                 header, seq, plus, qual = lines
                 new_seq = checkReverseComplement(header, seq, motifs)
+
+                # Keep track of the original read orientation.  This is needed
+                # later when --split-direction is requested.  The sequence can
+                # still be reverse-complemented for plotting, but the original
+                # orientation is retained in the header.
                 if new_seq != seq:
+                    orientation = "reverse"
                     # Reverse quality score if sequence was reversed
                     qual = qual[::-1]
+                else:
+                    orientation = "forward"
+
+                header = f"{header}:orientation_{orientation}"
                 outfile.write(f"{header}\n{new_seq}\n{plus}\n{qual}\n")
                 lines = []
+
+
+def getReadOrientation(rec):
+    """Return the original read orientation recorded in the FASTQ header."""
+    if ":orientation_reverse" in rec.name:
+        return "reverse"
+    if ":orientation_forward" in rec.name:
+        return "forward"
+
+    # When flanks were assigned, their *_rc annotation already identifies
+    # the original orientation.
+    if "_rc" in rec.name:
+        return "reverse"
+
+    return "forward"
                 
 def filterByQuality(recs, min_quality_threshold, quality_type):
     filtered_recs = []
@@ -400,6 +498,95 @@ def sortFunc(sort_type, motif, locus):
     elif sort_type =="flank_presence":
         return lambda rec: getFlankPresence(rec.name)
 
+
+def plotSplitWaterfall(forward_reads, reverse_reads, xlabel, ylabel, motifs, colors, labels=None, ax=None, **kwargs):
+    """
+    Plot forward reads above the x-axis and reverse reads below it.
+
+    Forward reads are ordered shortest -> longest, so the shortest read is
+    closest to the x-axis. Reverse reads are ordered longest -> shortest,
+    so the longest reverse read is closest to the x-axis.
+    """
+    if ax is None:
+        f, ax = plt.subplots()
+    else:
+        f = plt.gcf()
+
+    # Keep a common x dimension. motifRaster already uses the first sequence
+    # length as the raster width, so use the maximum read length here and pad
+    # each half before plotting.
+    all_reads = forward_reads + reverse_reads
+    if not all_reads:
+        raise ValueError("No reads available for split-direction waterfall")
+
+    width = max(len(rec.sequence) for rec in all_reads)
+
+    def padded_motif_raster(recs):
+        if not recs:
+            return np.empty((0, width, 3))
+        raster = motifRaster(recs, motifs, colors)
+        if raster.shape[1] < width:
+            pad = np.ones((raster.shape[0], width - raster.shape[1], 3))
+            raster = np.concatenate((raster, pad), axis=1)
+        elif raster.shape[1] > width:
+            raster = raster[:, :width, :]
+        return raster
+
+    # Forward: shortest -> longest, with shortest adjacent to y=0.
+    forward_sorted = sorted(forward_reads, key=lambda rec: len(rec.sequence), reverse=True)
+
+    # Reverse: longest -> shortest, with longest adjacent to y=0.
+    reverse_sorted = sorted(reverse_reads, key=lambda rec: len(rec.sequence))
+
+    forward_raster = padded_motif_raster(forward_sorted)
+    reverse_raster = padded_motif_raster(reverse_sorted)
+
+    # For the lower half, the last raster row is closest to y=0. Reverse the
+    # raster so the longest reverse read (first in reverse_sorted) is nearest
+    # the x-axis and the shortest is furthest below it.
+    #reverse_raster_for_plot = reverse_raster[::-1]
+
+    if len(forward_sorted):
+        ax.imshow(
+            forward_raster,
+            origin='lower',
+            aspect='auto',
+            interpolation='nearest',
+            extent=(0, width, 0, len(forward_sorted)),
+            **kwargs
+        )
+
+    if len(reverse_sorted):
+        ax.imshow(
+            reverse_raster,
+            origin='lower',
+            aspect='auto',
+            interpolation='nearest',
+            extent=(0, width, -len(reverse_sorted), 0),
+            **kwargs
+        )
+        
+    ax.set_xlim(0, width)
+    ax.set_ylim(-len(reverse_sorted), len(forward_sorted))
+    ax.axhline(0, color='black', linewidth=0.8)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+
+    # Labels for orientation are useful when the two halves have very
+    # different numbers of reads.
+    ax.text(0.1, 0.99, f"Forward (n={len(forward_sorted)})",
+            transform=ax.transAxes, ha='left', va='top')
+    ax.text(0.1, 0.01, f"Reverse (n={len(reverse_sorted)})",
+            transform=ax.transAxes, ha='left', va='bottom')
+
+    if labels:
+        ax.legend(handles=labels, bbox_to_anchor=(1.25, 0.6), loc='best', frameon=False)
+
+    return f, ax
+
+
 def plotWaterfall(array, xlabel, ylabel, labels=None, colorbar=False, ax=None, **kwargs):
     if ax is None:
         f, ax = plt.subplots()
@@ -417,20 +604,21 @@ def plotWaterfall(array, xlabel, ylabel, labels=None, colorbar=False, ax=None, *
     return f, ax
     
 def motifRaster(recs,motifs,colors):
-    raster        = np.ones((len(recs),
-                             len(recs[0].sequence),
-                             3))
-    patt          = re.compile('|'.join(['(%s)'%m for m in motifs]))
+    if not recs:
+        return np.empty((0, 0, 3))
+
+    width = max(len(rec.sequence) for rec in recs)
+    raster = np.ones((len(recs), width, 3))
+    patt = re.compile('|'.join(['(%s)'%m for m in motifs]))
     colors['other'] = UNKNOWN
 
     for i,rec in enumerate(recs):
         for j in patt.finditer(rec.sequence):
             raster[i,j.start():j.end(),:] = colors[j.group()]
 
-        #fill in unknown cells
-        blank = np.all(raster[i] == BLANK,axis=1)
-        blank[len(rec.sequence):] = False
-        raster[i,blank,:] = colors['other']
+        # Fill in unknown cells only within the read.
+        blank = np.all(raster[i, :len(rec.sequence)] == BLANK, axis=1)
+        raster[i, :len(rec.sequence)][blank, :] = colors['other']
     return raster
 
 def qvRaster(recs,title):
@@ -467,6 +655,8 @@ if __name__ == '__main__':
                     help='Set how reads are sorted. Options: repeat_length, repeat_count. Default Read length')
     parser.add_argument('-R,--reverse-complement', dest='fastq_RC', action='store_true',
                     help='Set whether reads should be reverse complemented based on motif counts. Default False')
+    parser.add_argument('--split-direction', dest='split_direction', action='store_true', default=False,
+                    help='Plot forward reads above the x-axis and reverse reads below it. Forward reads are sorted shortest-to-longest; reverse reads longest-to-shortest. Requires -R to identify reads by motif orientation.')
     parser.add_argument('-a,--allele_length', dest='allele_length', type=str, default=None,
                     help='Set whether reads are split between two graphs based on allele. Set with the number of repeats in the short allele. Not compatible with -q. Default None')
     parser.add_argument('-C,--colours', dest='colours', type=str, default=None,
